@@ -75,7 +75,7 @@ public class FileResource {
 
 
     //Define a method to download files
-    @GetMapping("download/{filename}")
+    /*@GetMapping("download/{filename}")
     public ResponseEntity<UrlResource> downloadFiles(@PathVariable("filename") String filename) throws IOException {
         Path filePath = Paths.get(DIRECTORY, filename).toAbsolutePath().normalize().resolve(filename);
         if(!Files.exists(filePath)){
@@ -89,6 +89,20 @@ public class FileResource {
                 .headers(httpHeaders).body(resource);
 
 
+    }*/
+
+    @GetMapping("download/{filename}")
+    public ResponseEntity<UrlResource> downloadFiles(@PathVariable("filename") String filename) throws IOException {
+        Path filePath = Paths.get(DIRECTORY, filename).toAbsolutePath().normalize();
+        if(!Files.exists(filePath)){
+            throw new FileNotFoundException(filename + " was not found on the server");
+        }
+        UrlResource resource = new UrlResource(filePath.toUri());
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("File-Name", filename);
+        httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + resource.getFilename());
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType(Files.probeContentType(filePath)))
+                .headers(httpHeaders).body(resource);
     }
 
 }
